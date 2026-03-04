@@ -50,8 +50,12 @@ if (-not $wslCheck) {
 }
 
 # Check for Arch WSL specifically
-$hasArch = wsl -l -q 2>$null | Where-Object { $_ -match "Arch" }
-if (-not $hasArch) {
+# NOTE: wsl -l outputs UTF-16LE with hidden null bytes — strip them before matching
+$wslRaw = (wsl -l -q 2>$null) -join "`n"
+$wslClean = $wslRaw -replace '\x00', ''
+$distroName = ($wslClean -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ -match "Arch" } | Select-Object -First 1)
+
+if (-not $distroName) {
     Write-Host ""
     Write-Warning "No Arch Linux WSL distribution found!"
     Write-Host ""
@@ -67,6 +71,8 @@ if (-not $hasArch) {
     exit
 }
 
+Write-Host "  Using WSL distro: $distroName" -ForegroundColor Green
+
 # ── Build ISO via WSL ──
 if (-not $SkipBuild) {
     Write-Host "`n[1/2] Building edpearOS via WSL..." -ForegroundColor Green
@@ -77,18 +83,12 @@ if (-not $SkipBuild) {
     $WslPath = "/mnt/$Drive$Path"
 
     $CleanArg = if ($CleanBuild) { " --clean" } else { "" }
-    $wslCmd = "cd '$WslPath' && find . -type f -name '*.sh' -exec dos2unix {} + 2>/dev/null; sudo bash ./scripts/build-iso.sh$CleanArg"
+    $wslCmd = "cd '$WslPath' && find . -type f -name '*.sh' -exec dos2unix {} + 2>/dev/null; bash ./scripts/build-iso.sh$CleanArg"
 
     Write-Host "  Executing in WSL: $wslCmd" -ForegroundColor DarkGray
     
     try {
-        # Use Arch distro if available, otherwise default
-        if ($hasArch) {
-            $distroName = ($hasArch | Select-Object -First 1).Trim()
-            wsl -d $distroName --user root -e bash -c "$wslCmd"
-        } else {
-            wsl --user root -e bash -c "$wslCmd"
-        }
+        wsl -d $distroName --user root -e bash -c "$wslCmd"
     }
     catch {
         Write-Error "WSL build failed. Check the output above for errors."
