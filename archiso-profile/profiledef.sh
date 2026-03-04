@@ -25,8 +25,8 @@ file_permissions=(
   ["/etc/shadow"]="0:0:400"
   ["/root"]="0:0:750"
   ["/root/.automated_script.sh"]="0:0:755"
-  ["/etc/skel/.local/bin/edpear-focus"]="0:0:755"
   ["/usr/local/bin/edpear-welcome"]="0:0:755"
   ["/usr/local/bin/edpear-focus"]="0:0:755"
   ["/usr/local/bin/edpear-setup"]="0:0:755"
+  ["/home/liveuser"]="1000:1000:750"
 )

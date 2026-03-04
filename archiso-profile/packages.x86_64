@@ -69,7 +69,6 @@ breeze
 breeze-gtk
 kinfocenter
 kgamma
-kwrited
 
 # --- KDE Core Apps ---
 dolphin
@@ -102,12 +101,11 @@ polkit-kde-agent
 
 # --- Calamares Installer ---
 calamares
-calamares-extensions
 
 # --- Student Productivity Stack ---
 libreoffice-fresh
-obsidian
-zotero
+obsidian-bin
+zotero-bin
 firefox
 chromium
 thunderbird
@@ -122,10 +120,8 @@ python-gobject
 python-virtualenv
 nodejs
 npm
-code
-git
+visual-studio-code-bin
 github-cli
-base-devel
 cmake
 gcc
 gdb
@@ -135,7 +131,6 @@ flatpak
 timeshift
 htop
 btop
-neofetch
 fastfetch
 unzip
 zip
@@ -165,7 +160,6 @@ ttf-dejavu
 # --- Theming ---
 papirus-icon-theme
 kvantum
-kvantum-qt5
 
 # --- GTK / Qt Integration ---
 gtk3
@@ -175,19 +169,16 @@ qt6ct
 
 # --- Notification & System ---
 libnotify
-notification-daemon
 zenity
 xdg-desktop-portal
 xdg-desktop-portal-kde
 xdg-desktop-portal-gtk
 
 # --- Python deps for welcome app ---
-python-gobject
-gtk4
 libadwaita
 
 # --- Misc ---
 bash-completion
 nano
 vim
-Less
+less

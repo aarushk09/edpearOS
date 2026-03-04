@@ -120,6 +120,33 @@ if [ ! -f "$BRAND_DIR/welcome.png" ]; then
   cp "$BRAND_DIR/logo.png" "$BRAND_DIR/welcome.png" 2>/dev/null || true
 fi
 
+# ── Create systemd service symlinks ──
+# (Needed because Windows/NTFS can't store Unix symlinks in the git repo)
+echo "==> Creating systemd service enable symlinks..."
+mkdir -p "$PROFILE_DIR/airootfs/etc/systemd/system/multi-user.target.wants"
+mkdir -p "$PROFILE_DIR/airootfs/etc/systemd/system/timers.target.wants"
+
+# SDDM — display manager
+ln -sf /usr/lib/systemd/system/sddm.service \
+  "$PROFILE_DIR/airootfs/etc/systemd/system/display-manager.service"
+
+# NetworkManager
+ln -sf /usr/lib/systemd/system/NetworkManager.service \
+  "$PROFILE_DIR/airootfs/etc/systemd/system/multi-user.target.wants/NetworkManager.service"
+
+# Bluetooth
+ln -sf /usr/lib/systemd/system/bluetooth.service \
+  "$PROFILE_DIR/airootfs/etc/systemd/system/multi-user.target.wants/bluetooth.service"
+
+# Periodic TRIM for SSDs
+ln -sf /usr/lib/systemd/system/fstrim.timer \
+  "$PROFILE_DIR/airootfs/etc/systemd/system/timers.target.wants/fstrim.timer"
+
+# ── Create liveuser home directory from skel ──
+echo "==> Setting up liveuser home directory..."
+mkdir -p "$PROFILE_DIR/airootfs/home/liveuser"
+cp -rT "$PROFILE_DIR/airootfs/etc/skel" "$PROFILE_DIR/airootfs/home/liveuser"
+
 # ── Build ISO ──
 echo ""
 echo "==> Building edpearOS ISO with mkarchiso..."
