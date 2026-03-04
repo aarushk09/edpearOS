@@ -1,0 +1,234 @@
+#!/usr/bin/env bash
+# ═══════════════════════════════════════════════════════════════
+# edpear-focus — Student Focus Mode for edpearOS
+# Toggle Do Not Disturb + website blocking in one command
+#
+# Usage:
+#   edpear-focus on        Enable focus mode
+#   edpear-focus off       Disable focus mode
+#   edpear-focus toggle    Toggle focus mode
+#   edpear-focus status    Show current status
+#   edpear-focus daemon    Run as a persistent daemon (systemd)
+# ═══════════════════════════════════════════════════════════════
+set -euo pipefail
+
+# Config paths (user overrides system)
+SYSTEM_BLOCKLIST="/etc/edpearos/focus-blocklist.txt"
+USER_BLOCKLIST="${XDG_CONFIG_HOME:-$HOME/.config}/edpearos/focus-blocklist.txt"
+STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/edpear-focus-state"
+
+# Resolve which blocklist to use
+BLOCKLIST_FILE="$SYSTEM_BLOCKLIST"
+[ -f "$USER_BLOCKLIST" ] && BLOCKLIST_FILE="$USER_BLOCKLIST"
+
+# Default blocklist if no file exists at all
+DEFAULT_BLOCKLIST=(
+  "facebook.com" "www.facebook.com"
+  "twitter.com"  "www.twitter.com"
+  "x.com"        "www.x.com"
+  "instagram.com" "www.instagram.com"
+  "tiktok.com"   "www.tiktok.com"
+  "reddit.com"   "www.reddit.com"
+  "youtube.com"  "www.youtube.com"
+  "netflix.com"  "www.netflix.com"
+  "twitch.tv"    "www.twitch.tv"
+)
+
+MARKER_START="# >>> EDPEAROS FOCUS MODE >>>"
+MARKER_END="# <<< EDPEAROS FOCUS MODE <<<"
+
+log() { echo "[edpear-focus] $*"; }
+
+notify() {
+  if command -v notify-send &>/dev/null; then
+    notify-send --icon=dialog-information "edpearOS Focus" "$1" 2>/dev/null || true
+  fi
+}
+
+is_active() {
+  [ -f "$STATE_FILE" ] && [ "$(cat "$STATE_FILE" 2>/dev/null)" = "active" ]
+}
+
+# ── Do Not Disturb (KDE Plasma) ──
+enable_dnd() {
+  # KDE Plasma DND via dbus
+  if command -v qdbus &>/dev/null; then
+    qdbus org.freedesktop.Notifications /org/freedesktop/Notifications \
+      org.freedesktop.Notifications.Inhibit "edpear-focus" "Focus mode active" \
+      2>/dev/null || true
+  fi
+  # Also try kwriteconfig for persistent setting
+  if command -v kwriteconfig5 &>/dev/null; then
+    kwriteconfig5 --file kloggingrc --group Logging --key DoNotDisturb true 2>/dev/null || true
+  fi
+  # dunst (Hyprland) DND
+  if command -v dunstctl &>/dev/null; then
+    dunstctl set-paused true 2>/dev/null || true
+  fi
+  log "Do Not Disturb enabled"
+}
+
+disable_dnd() {
+  if command -v dunstctl &>/dev/null; then
+    dunstctl set-paused false 2>/dev/null || true
+  fi
+  if command -v kwriteconfig5 &>/dev/null; then
+    kwriteconfig5 --file kloggingrc --group Logging --key DoNotDisturb false 2>/dev/null || true
+  fi
+  log "Do Not Disturb disabled"
+}
+
+# ── Website Blocking ──
+get_blocklist() {
+  if [ -f "$BLOCKLIST_FILE" ]; then
+    grep -v '^#' "$BLOCKLIST_FILE" | grep -v '^$' || true
+  else
+    printf '%s\n' "${DEFAULT_BLOCKLIST[@]}"
+  fi
+}
+
+_apply_hosts() {
+  local action="$1"
+  local hosts_file="/etc/hosts"
+
+  if [ "$action" = "on" ]; then
+    # Remove existing block first
+    if grep -q "$MARKER_START" "$hosts_file" 2>/dev/null; then
+      sed -i "/$MARKER_START/,/$MARKER_END/d" "$hosts_file"
+    fi
+    # Append new block
+    {
+      echo "$MARKER_START"
+      while IFS= read -r domain; do
+        [ -z "$domain" ] && continue
+        echo "127.0.0.1 $domain"
+      done < <(get_blocklist)
+      echo "$MARKER_END"
+    } >> "$hosts_file"
+    log "Website blocking enabled ($(get_blocklist | wc -l) domains)"
+
+  elif [ "$action" = "off" ]; then
+    if grep -q "$MARKER_START" "$hosts_file" 2>/dev/null; then
+      sed -i "/$MARKER_START/,/$MARKER_END/d" "$hosts_file"
+      log "Website blocking disabled"
+    fi
+  fi
+}
+
+enable_webblock() {
+  if [ "$(id -u)" -ne 0 ]; then
+    pkexec "$0" _apply_hosts on
+  else
+    _apply_hosts on
+  fi
+}
+
+disable_webblock() {
+  if [ "$(id -u)" -ne 0 ]; then
+    pkexec "$0" _apply_hosts off
+  else
+    _apply_hosts off
+  fi
+}
+
+# ── Blue Light Filter ──
+enable_nightlight() {
+  # KDE Night Color
+  if command -v kwriteconfig5 &>/dev/null; then
+    kwriteconfig5 --file kwinrc --group NightColor --key Active true
+    kwriteconfig5 --file kwinrc --group NightColor --key NightTemperature 3500
+    qdbus org.kde.KWin /KWin reconfigure 2>/dev/null || true
+  fi
+  log "Blue light filter enabled"
+}
+
+disable_nightlight() {
+  if command -v kwriteconfig5 &>/dev/null; then
+    kwriteconfig5 --file kwinrc --group NightColor --key Active false
+    qdbus org.kde.KWin /KWin reconfigure 2>/dev/null || true
+  fi
+  log "Blue light filter disabled"
+}
+
+# ── Focus Mode Commands ──
+focus_on() {
+  if is_active; then
+    log "Focus mode is already active"
+    return 0
+  fi
+  log "Enabling focus mode..."
+  enable_dnd
+  enable_webblock
+  enable_nightlight
+  echo "active" > "$STATE_FILE"
+  notify "🎯 Focus mode ENABLED. Stay locked in!"
+  log "Focus mode is now ACTIVE"
+}
+
+focus_off() {
+  if ! is_active; then
+    log "Focus mode is already inactive"
+    return 0
+  fi
+  log "Disabling focus mode..."
+  disable_dnd
+  disable_webblock
+  disable_nightlight
+  echo "inactive" > "$STATE_FILE"
+  notify "☕ Focus mode DISABLED. Take a break!"
+  log "Focus mode is now INACTIVE"
+}
+
+focus_toggle() {
+  if is_active; then focus_off; else focus_on; fi
+}
+
+focus_status() {
+  if is_active; then
+    echo "Focus mode: ACTIVE"
+    echo "DND: enabled"
+    if grep -q "$MARKER_START" /etc/hosts 2>/dev/null; then
+      echo "Web blocking: enabled"
+    else
+      echo "Web blocking: disabled (requires root)"
+    fi
+    echo "Night light: enabled"
+  else
+    echo "Focus mode: INACTIVE"
+  fi
+}
+
+daemon_mode() {
+  log "Starting focus mode daemon..."
+  trap 'focus_off; exit 0' TERM INT
+  while true; do sleep 60; done
+}
+
+# ── Main ──
+case "${1:-help}" in
+  on)       focus_on ;;
+  off)      focus_off ;;
+  toggle)   focus_toggle ;;
+  status)   focus_status ;;
+  daemon)   daemon_mode ;;
+  _apply_hosts) shift; _apply_hosts "$@" ;;
+  help|--help|-h)
+    cat << 'EOF'
+edpear-focus — Student Focus Mode for edpearOS
+
+Usage: edpear-focus {on|off|toggle|status|daemon}
+
+Commands:
+  on       Enable focus mode (DND + web blocking + night light)
+  off      Disable focus mode
+  toggle   Toggle focus mode on/off
+  status   Show current focus mode status
+  daemon   Run as a daemon (for systemd)
+
+Config:
+  System blocklist: /etc/edpearos/focus-blocklist.txt
+  User override:    ~/.config/edpearos/focus-blocklist.txt
+EOF
+    ;;
+  *) echo "Unknown command: $1"; echo "Run 'edpear-focus help' for usage"; exit 1 ;;
+esac

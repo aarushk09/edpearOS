@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=edpearOS Welcome
+Exec=/usr/local/bin/edpear-welcome
+Hidden=false
+X-GNOME-Autostart-enabled=true
+Comment=Study workspace launcher — opens on first login

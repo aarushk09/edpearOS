@@ -1,0 +1,6 @@
+# edpearOS sudoers — wheel group has sudo access
+root ALL=(ALL:ALL) ALL
+%wheel ALL=(ALL:ALL) ALL
+
+# Allow live user passwordless sudo
+liveuser ALL=(ALL) NOPASSWD: ALL

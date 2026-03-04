@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=XSession
+Exec=Hyprland
+TryExec=Hyprland
+DesktopNames=Hyprland
+Name=edpearOS Hyprland
+Comment=Hyprland tiling compositor - Student power mode

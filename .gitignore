@@ -1,0 +1,27 @@
+# Build outputs
+out/
+*.iso
+*.iso.sha256
+*.img
+
+# Node
+node_modules/
+dist/
+build/
+
+# Archiso work directory
+work/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log

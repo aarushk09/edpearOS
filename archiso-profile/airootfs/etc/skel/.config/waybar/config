@@ -1,0 +1,71 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 36,
+    "spacing": 4,
+    "modules-left": ["hyprland/workspaces", "hyprland/window"],
+    "modules-center": ["clock"],
+    "modules-right": ["custom/focus", "pulseaudio", "network", "battery", "tray"],
+
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "1": "󰣇",
+            "2": "󰈙",
+            "3": "󰊯",
+            "4": "",
+            "5": "󰙯",
+            "active": "󰮯",
+            "default": "󰊠"
+        },
+        "on-click": "activate"
+    },
+
+    "hyprland/window": {
+        "format": "{}",
+        "max-length": 50
+    },
+
+    "clock": {
+        "format": "  {:%a %b %d   %I:%M %p}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt>{calendar}</tt>"
+    },
+
+    "custom/focus": {
+        "format": "{}",
+        "exec": "if [ -f ${XDG_RUNTIME_DIR:-/tmp}/edpear-focus-state ] && [ \"$(cat ${XDG_RUNTIME_DIR:-/tmp}/edpear-focus-state)\" = 'active' ]; then echo '🎯 Focus'; else echo '☕ Chill'; fi",
+        "interval": 5,
+        "on-click": "/usr/local/bin/edpear-focus toggle",
+        "tooltip": "Click to toggle Focus Mode"
+    },
+
+    "battery": {
+        "format": "{icon} {capacity}%",
+        "format-icons": ["", "", "", "", ""],
+        "format-charging": "⚡ {capacity}%",
+        "states": {
+            "warning": 30,
+            "critical": 15
+        }
+    },
+
+    "network": {
+        "format-wifi": "  {signalStrength}%",
+        "format-ethernet": "󰈀 Connected",
+        "format-disconnected": "󰤭 Offline",
+        "tooltip-format": "{ifname}: {ipaddr}"
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "󰝟 Muted",
+        "format-icons": {
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol"
+    },
+
+    "tray": {
+        "spacing": 10
+    }
+}

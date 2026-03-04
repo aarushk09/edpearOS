@@ -1,0 +1,115 @@
+# ═══════════════════════════════════════════════════════════════
+# edpearOS — GitHub Actions ISO Build
+# Automatically builds a new ISO on every push to main or tag
+# Uses an Arch Linux container to run mkarchiso
+# ═══════════════════════════════════════════════════════════════
+name: Build edpearOS ISO
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --privileged
+
+    steps:
+      - name: Install prerequisites
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm archiso git base-devel squashfs-tools dosfstools mtools libisoburn
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Chaotic-AUR
+        run: |
+          pacman-key --init
+          pacman-key --populate archlinux
+          pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com || true
+          pacman-key --lsign-key 3056513887B78AEB || true
+          pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-keyring.pkg.tar.zst' || true
+          pacman -U --noconfirm 'https://cdn-mirror.chaotic.cx/chaotic-aur/chaotic-mirrorlist.pkg.tar.zst' || true
+          echo "" >> /etc/pacman.conf
+          echo "[chaotic-aur]" >> /etc/pacman.conf
+          echo "Include = /etc/pacman.d/chaotic-mirrorlist" >> /etc/pacman.conf
+          pacman -Sy
+
+      - name: Build ISO
+        run: |
+          chmod +x scripts/build-iso.sh
+          bash scripts/build-iso.sh --clean
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: edpearOS-iso
+          path: out/edpearOS-*.iso
+          retention-days: 7
+          compression-level: 0
+
+      - name: Upload checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: edpearOS-checksum
+          path: out/edpearOS-*.iso.sha256
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download ISO artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: edpearOS-iso
+          path: ./release
+
+      - name: Download checksum
+        uses: actions/download-artifact@v4
+        with:
+          name: edpearOS-checksum
+          path: ./release
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/edpearOS-*.iso
+            release/edpearOS-*.iso.sha256
+          body: |
+            ## edpearOS ${{ github.ref_name }}
+            
+            **The Modern Student Desktop** — Built on Arch Linux
+            
+            ### Quick Start
+            1. Download the `.iso` file below
+            2. Flash to USB with [Rufus](https://rufus.ie) (Windows) or `dd` (Linux)
+            3. Boot from USB
+            4. Click "Install edpearOS" on the desktop
+            
+            ### Features
+            - KDE Plasma + Hyprland (tiling) desktop options
+            - Focus Mode (DND + website blocking + blue light filter)
+            - Pre-installed: Obsidian, Zotero, LibreOffice, VS Code, Firefox
+            - Student workspace launcher ("What are you studying today?")
+            - Pre-configured keyboard shortcuts for productivity
+            - Calamares graphical installer with student major selection
+            
+            ### Verify download
+            ```
+            sha256sum -c edpearOS-*.iso.sha256
+            ```
+          draft: false
+          prerelease: false

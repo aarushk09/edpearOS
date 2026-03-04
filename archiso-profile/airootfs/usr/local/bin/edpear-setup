@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# ═══════════════════════════════════════════════════════════
+# edpear-setup — Runs inside the archiso live environment
+# Called by the archiso customize_airootfs hook
+# Sets up the live user, enables services, configures the system
+# ═══════════════════════════════════════════════════════════
+set -euo pipefail
+
+echo "================================================="
+echo "  edpearOS — Live Environment Setup"
+echo "================================================="
+
+# ── Locale ──
+echo "==> Generating locale..."
+locale-gen
+
+# ── Create live user ──
+echo "==> Creating liveuser..."
+if ! id liveuser &>/dev/null; then
+    useradd -m -G wheel,video,audio,network,storage,rfkill -s /bin/bash liveuser
+fi
+# No password for live session
+passwd -d liveuser 2>/dev/null || true
+
+# ── Copy skel to liveuser ──
+echo "==> Setting up liveuser home..."
+cp -rT /etc/skel /home/liveuser
+chown -R liveuser:liveuser /home/liveuser
+
+# ── Enable core services ──
+echo "==> Enabling services..."
+systemctl enable NetworkManager
+systemctl enable sddm
+systemctl enable bluetooth 2>/dev/null || true
+systemctl enable fstrim.timer 2>/dev/null || true
+
+# ── Chaotic-AUR keyring setup ──
+echo "==> Setting up Chaotic-AUR keyring..."
+if command -v pacman-key &>/dev/null; then
+    pacman-key --init
+    pacman-key --populate archlinux
+    # Chaotic-AUR key
+    pacman-key --recv-key 3056513887B78AEB --keyserver keyserver.ubuntu.com 2>/dev/null || true
+    pacman-key --lsign-key 3056513887B78AEB 2>/dev/null || true
+fi
+
+# ── Flatpak ──
+echo "==> Configuring Flatpak..."
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+
+# ── Timeshift defaults ──
+echo "==> Configuring Timeshift..."
+mkdir -p /etc/timeshift
+cat > /etc/timeshift/timeshift.json << 'EOF'
+{
+  "backup_device_uuid": "",
+  "do_first_run": true,
+  "btrfs_mode": false,
+  "schedule_weekly": true,
+  "schedule_daily": true,
+  "count_weekly": 3,
+  "count_daily": 5,
+  "exclude": [
+    "/home/**/.cache/**",
+    "/home/**/.local/share/Trash/**",
+    "/home/**/node_modules/**"
+  ]
+}
+EOF
+
+# ── Ensure permissions ──
+echo "==> Fixing permissions..."
+chmod 755 /usr/local/bin/edpear-focus 2>/dev/null || true
+chmod 755 /usr/local/bin/edpear-welcome 2>/dev/null || true
+chmod 755 /usr/local/bin/edpear-setup 2>/dev/null || true
+
+# ── SDDM theme ──
+echo "==> Configuring SDDM..."
+mkdir -p /etc/sddm.conf.d
+
+# ── Create placeholder wallpaper (actual wallpaper added by branding) ──
+mkdir -p /usr/share/edpearos/wallpapers
+if [ ! -f /usr/share/edpearos/wallpapers/default.png ]; then
+    # Generate a simple dark gradient placeholder
+    if command -v convert &>/dev/null; then
+        convert -size 1920x1080 'gradient:#1a1b26-#24283b' /usr/share/edpearos/wallpapers/default.png 2>/dev/null || true
+    fi
+fi
+
+# ── Desktop database update ──
+update-desktop-database /usr/share/applications 2>/dev/null || true
+
+echo "================================================="
+echo "  edpearOS live environment setup complete!"
+echo "================================================="

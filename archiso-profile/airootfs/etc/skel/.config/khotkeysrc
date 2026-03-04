@@ -1,0 +1,100 @@
+# edpearOS KDE Custom Keyboard Shortcuts
+# Student-focused shortcuts mapped to Super key
+
+[edpearos-notes]
+Comment=Open Notes (Obsidian)
+Enabled=true
+Name=Open Notes
+Type=SIMPLE_ACTION_DATA
+[edpearos-notes][Data]
+[edpearos-notes][Data][1st Key]
+Type=COMMAND_URL
+CommandURL=obsidian
+[edpearos-notes][Triggers]
+[edpearos-notes][Triggers][Shortcut Trigger 0]
+Type=SHORTCUT
+Key=Meta+N
+
+[edpearos-calc]
+Comment=Open Calculator
+Enabled=true
+Name=Open Calculator
+Type=SIMPLE_ACTION_DATA
+[edpearos-calc][Data]
+[edpearos-calc][Data][1st Key]
+Type=COMMAND_URL
+CommandURL=kcalc
+[edpearos-calc][Triggers]
+[edpearos-calc][Triggers][Shortcut Trigger 0]
+Type=SHORTCUT
+Key=Meta+C
+
+[edpearos-terminal]
+Comment=Open Terminal
+Enabled=true
+Name=Open Terminal
+Type=SIMPLE_ACTION_DATA
+[edpearos-terminal][Data]
+[edpearos-terminal][Data][1st Key]
+Type=COMMAND_URL
+CommandURL=konsole
+[edpearos-terminal][Triggers]
+[edpearos-terminal][Triggers][Shortcut Trigger 0]
+Type=SHORTCUT
+Key=Meta+T
+
+[edpearos-files]
+Comment=Open File Manager
+Enabled=true
+Name=Open File Manager
+Type=SIMPLE_ACTION_DATA
+[edpearos-files][Data]
+[edpearos-files][Data][1st Key]
+Type=COMMAND_URL
+CommandURL=dolphin
+[edpearos-files][Triggers]
+[edpearos-files][Triggers][Shortcut Trigger 0]
+Type=SHORTCUT
+Key=Meta+E
+
+[edpearos-focus]
+Comment=Toggle Focus Mode
+Enabled=true
+Name=Toggle Focus Mode
+Type=SIMPLE_ACTION_DATA
+[edpearos-focus][Data]
+[edpearos-focus][Data][1st Key]
+Type=COMMAND_URL
+CommandURL=/usr/local/bin/edpear-focus toggle
+[edpearos-focus][Triggers]
+[edpearos-focus][Triggers][Shortcut Trigger 0]
+Type=SHORTCUT
+Key=Meta+F
+
+[edpearos-browser]
+Comment=Open Browser
+Enabled=true
+Name=Open Browser
+Type=SIMPLE_ACTION_DATA
+[edpearos-browser][Data]
+[edpearos-browser][Data][1st Key]
+Type=COMMAND_URL
+CommandURL=firefox
+[edpearos-browser][Triggers]
+[edpearos-browser][Triggers][Shortcut Trigger 0]
+Type=SHORTCUT
+Key=Meta+B
+
+[edpearos-welcome]
+Comment=Study Launcher
+Enabled=true
+Name=Study Launcher
+Type=SIMPLE_ACTION_DATA
+[edpearos-welcome][Data]
+[edpearos-welcome][Data][1st Key]
+Type=COMMAND_URL
+CommandURL=/usr/local/bin/edpear-welcome
+[edpearos-welcome][Triggers]
+[edpearos-welcome][Triggers][Shortcut Trigger 0]
+Type=SHORTCUT
+Key=Meta+W

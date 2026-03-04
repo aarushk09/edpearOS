@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=edpearOS Welcome
+Comment=What are you studying today?
+Exec=/usr/local/bin/edpear-welcome
+Icon=system-help
+Terminal=false
+Type=Application
+Categories=Utility;
+Keywords=welcome;study;workspace;student;
+StartupWMClass=edpear-welcome

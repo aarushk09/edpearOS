@@ -1,0 +1,30 @@
+---
+componentName:  edpearos
+welcomeStyleCalamares:   false
+welcomeExpandingLogo:    true
+
+strings:
+    productName:         edpearOS
+    shortProductName:    edpearOS
+    version:             2026.1
+    shortVersion:        2026.1
+    versionedName:       edpearOS 2026.1
+    shortVersionedName:  edpearOS 2026.1
+    bootloaderEntryName: edpearOS
+    productUrl:          https://github.com/aarushk09/edpearOS
+    supportUrl:          https://github.com/aarushk09/edpearOS/issues
+    knownIssuesUrl:      https://github.com/aarushk09/edpearOS/issues
+    releaseNotesUrl:     https://github.com/aarushk09/edpearOS/releases
+
+images:
+    productLogo:         "logo.png"
+    productIcon:         "logo.png"
+    productWelcome:      "welcome.png"
+
+slideshow:               "show.qml"
+
+style:
+    sidebarBackground:   "#1a1b26"
+    sidebarText:         "#c0caf5"
+    sidebarTextSelect:   "#7aa2f7"
+    sidebarTextHighlight: "#bb9af7"

@@ -1,0 +1,193 @@
+# ==============================================================================
+# edpearOS — Package List (packages.x86_64)
+# These packages are installed into the live ISO and carried into the install.
+# ==============================================================================
+
+# --- Base System ---
+base
+base-devel
+linux
+linux-firmware
+linux-headers
+mkinitcpio
+efibootmgr
+grub
+os-prober
+ntfs-3g
+dosfstools
+btrfs-progs
+e2fsprogs
+xfsprogs
+
+# --- Boot & Init ---
+systemd
+systemd-sysvcompat
+sudo
+polkit
+
+# --- Networking ---
+networkmanager
+network-manager-applet
+iwd
+bluez
+bluez-utils
+openssh
+curl
+wget
+git
+rsync
+reflector
+
+# --- Audio ---
+pipewire
+pipewire-alsa
+pipewire-pulse
+pipewire-jack
+wireplumber
+pavucontrol
+
+# --- Display / Wayland / X11 ---
+xorg-server
+xorg-xinit
+xorg-xwayland
+wayland
+qt5-wayland
+qt6-wayland
+
+# --- KDE Plasma Desktop ---
+plasma-meta
+plasma-workspace
+plasma-desktop
+sddm
+kscreen
+powerdevil
+bluedevil
+plasma-nm
+plasma-pa
+kde-gtk-config
+breeze
+breeze-gtk
+kinfocenter
+kgamma
+kwrited
+
+# --- KDE Core Apps ---
+dolphin
+konsole
+kate
+ark
+spectacle
+gwenview
+okular
+kcalc
+kfind
+filelight
+ksystemlog
+partitionmanager
+
+# --- Hyprland (optional tiling WM) ---
+hyprland
+hyprpaper
+hyprlock
+hypridle
+waybar
+wofi
+dunst
+wl-clipboard
+grim
+slurp
+swappy
+xdg-desktop-portal-hyprland
+polkit-kde-agent
+
+# --- Calamares Installer ---
+calamares
+calamares-extensions
+
+# --- Student Productivity Stack ---
+libreoffice-fresh
+obsidian
+zotero
+firefox
+chromium
+thunderbird
+texlive-basic
+texlive-latexrecommended
+texlive-bibtexextra
+
+# --- Development Tools ---
+python
+python-pip
+python-gobject
+python-virtualenv
+nodejs
+npm
+code
+git
+github-cli
+base-devel
+cmake
+gcc
+gdb
+
+# --- Utilities ---
+flatpak
+timeshift
+htop
+btop
+neofetch
+fastfetch
+unzip
+zip
+p7zip
+man-db
+man-pages
+tree
+jq
+ripgrep
+fd
+fzf
+bat
+eza
+xdg-utils
+xdg-user-dirs
+
+# --- Fonts ---
+ttf-jetbrains-mono-nerd
+ttf-firacode-nerd
+ttf-roboto
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
+ttf-liberation
+ttf-dejavu
+
+# --- Theming ---
+papirus-icon-theme
+kvantum
+kvantum-qt5
+
+# --- GTK / Qt Integration ---
+gtk3
+gtk4
+qt5ct
+qt6ct
+
+# --- Notification & System ---
+libnotify
+notification-daemon
+zenity
+xdg-desktop-portal
+xdg-desktop-portal-kde
+xdg-desktop-portal-gtk
+
+# --- Python deps for welcome app ---
+python-gobject
+gtk4
+libadwaita
+
+# --- Misc ---
+bash-completion
+nano
+vim
+Less
