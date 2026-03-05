@@ -1,0 +1,17 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "",
+                "Name": "edpearOS Team"
+            }
+        ],
+        "Description": "The edpearOS student desktop experience — Tokyo Night dark theme with study-focused layout",
+        "Id": "org.edpearos.desktop",
+        "License": "MIT",
+        "Name": "edpearOS",
+        "Version": "1.0.0",
+        "Website": "https://github.com/aarushk09/edpearos-desktop"
+    },
+    "X-Plasma-APIVersion": "2"
+}

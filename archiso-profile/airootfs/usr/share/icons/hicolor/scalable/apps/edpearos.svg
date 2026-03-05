@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7aa2f7"/>
+      <stop offset="100%" stop-color="#bb9af7"/>
+    </linearGradient>
+    <linearGradient id="bookGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c0caf5"/>
+      <stop offset="100%" stop-color="#a9b1d6"/>
+    </linearGradient>
+  </defs>
+  <!-- Circle background -->
+  <circle cx="256" cy="256" r="240" fill="url(#bg)" opacity="0.9"/>
+  <!-- Open book shape -->
+  <g transform="translate(256,260)">
+    <!-- Left page -->
+    <path d="M-10,-60 Q-10,-80 -30,-85 L-100,-75 Q-110,-73 -110,-60 L-110,50 Q-110,63 -100,65 L-30,55 Q-10,52 -10,40 Z"
+          fill="url(#bookGrad)" opacity="0.95"/>
+    <!-- Right page -->
+    <path d="M10,-60 Q10,-80 30,-85 L100,-75 Q110,-73 110,-60 L110,50 Q110,63 100,65 L30,55 Q10,52 10,40 Z"
+          fill="url(#bookGrad)" opacity="0.85"/>
+    <!-- Spine -->
+    <path d="M-10,-60 Q0,-65 10,-60 L10,40 Q0,45 -10,40 Z"
+          fill="#1a1b26" opacity="0.3"/>
+    <!-- Page lines (left) -->
+    <line x1="-90" y1="-55" x2="-25" y2="-62" stroke="#7aa2f7" stroke-width="2.5" opacity="0.5"/>
+    <line x1="-90" y1="-38" x2="-25" y2="-45" stroke="#7aa2f7" stroke-width="2.5" opacity="0.4"/>
+    <line x1="-90" y1="-21" x2="-25" y2="-28" stroke="#7aa2f7" stroke-width="2.5" opacity="0.3"/>
+    <line x1="-90" y1="-4"  x2="-25" y2="-11" stroke="#7aa2f7" stroke-width="2.5" opacity="0.25"/>
+    <!-- Page lines (right) -->
+    <line x1="90" y1="-55" x2="25" y2="-62" stroke="#bb9af7" stroke-width="2.5" opacity="0.5"/>
+    <line x1="90" y1="-38" x2="25" y2="-45" stroke="#bb9af7" stroke-width="2.5" opacity="0.4"/>
+    <line x1="90" y1="-21" x2="25" y2="-28" stroke="#bb9af7" stroke-width="2.5" opacity="0.3"/>
+    <!-- Star/spark (knowledge) -->
+    <path d="M0,-105 L5,-90 L15,-85 L5,-80 L0,-65 L-5,-80 L-15,-85 L-5,-90 Z"
+          fill="#e0af68" opacity="0.9"/>
+  </g>
+  <!-- "eP" monogram text -->
+  <text x="256" y="390" text-anchor="middle" font-family="sans-serif" font-weight="700"
+        font-size="42" fill="#1a1b26" opacity="0.6" letter-spacing="2">eP</text>
+</svg>

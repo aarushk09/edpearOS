@@ -1,0 +1,12 @@
+[SddmGreeterTheme]
+Name=edpearOS
+Description=Dark Tokyo Night login screen for edpearOS
+Author=edpearOS Team
+License=MIT
+Type=sddm-theme
+Version=1.0.0
+Website=https://github.com/aarushk09/edpearos-desktop
+Screenshot=preview.png
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=translations

@@ -1,21 +1,22 @@
-[General]
-ColorScheme=EdpearOSTokyo
-Name=edpearOS Tokyo Night
-shadeSortColumn=true
-font=Noto Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-fixed=JetBrainsMono Nerd Font,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-smallestReadableFont=Noto Sans,8,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-toolBarFont=Noto Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
-menuFont=Noto Sans,10,-1,5,400,0,0,0,0,0,0,0,0,0,0,1
+[ColorEffects:Disabled]
+Color=56,56,56
+ColorAmount=0
+ColorEffect=0
+ContrastAmount=0.65
+ContrastEffect=1
+IntensityAmount=0.1
+IntensityEffect=2
 
-[Icons]
-Theme=Papirus-Dark
-
-[KDE]
-SingleClick=false
-AnimationDurationFactor=0.5
-LookAndFeelPackage=org.edpearos.desktop
-widgetStyle=kvantum
+[ColorEffects:Inactive]
+ChangeSelectionColor=true
+Color=26,27,38
+ColorAmount=0.025
+ColorEffect=2
+ContrastAmount=0.1
+ContrastEffect=2
+Enable=false
+IntensityAmount=0
+IntensityEffect=0
 
 [Colors:Button]
 BackgroundAlternate=36,40,59
@@ -56,6 +57,20 @@ ForegroundLink=125,207,255
 ForegroundNegative=247,118,142
 ForegroundNeutral=224,175,104
 ForegroundNormal=192,202,245
+ForegroundPositive=158,206,106
+ForegroundVisited=187,154,247
+
+[Colors:Header][Inactive]
+BackgroundAlternate=22,22,30
+BackgroundNormal=26,27,38
+DecorationFocus=122,162,247
+DecorationHover=187,154,247
+ForegroundActive=122,162,247
+ForegroundInactive=86,95,137
+ForegroundLink=125,207,255
+ForegroundNegative=247,118,142
+ForegroundNeutral=224,175,104
+ForegroundNormal=169,177,214
 ForegroundPositive=158,206,106
 ForegroundVisited=187,154,247
 
@@ -115,6 +130,14 @@ ForegroundNormal=192,202,245
 ForegroundPositive=158,206,106
 ForegroundVisited=187,154,247
 
+[General]
+ColorScheme=EdpearOSTokyo
+Name=edpearOS Tokyo Night
+shadeSortColumn=true
+
+[KDE]
+contrast=4
+
 [WM]
 activeBackground=26,27,38
 activeBlend=122,162,247
@@ -122,4 +145,3 @@ activeForeground=192,202,245
 inactiveBackground=36,40,59
 inactiveBlend=86,95,137
 inactiveForeground=86,95,137
-

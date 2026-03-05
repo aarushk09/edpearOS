@@ -163,6 +163,7 @@ ttf-dejavu
 # --- Theming ---
 papirus-icon-theme
 kvantum
+imagemagick
 
 # --- GTK / Qt Integration ---
 gtk3

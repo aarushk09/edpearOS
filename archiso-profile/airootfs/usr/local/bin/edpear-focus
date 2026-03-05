@@ -49,17 +49,22 @@ is_active() {
   [ -f "$STATE_FILE" ] && [ "$(cat "$STATE_FILE" 2>/dev/null)" = "active" ]
 }
 
-# ── Do Not Disturb (KDE Plasma) ──
+# ── Do Not Disturb (KDE Plasma 6) ──
 enable_dnd() {
+  local QDBUS="qdbus6"
+  command -v qdbus6 &>/dev/null || QDBUS="qdbus"
+  local KWC="kwriteconfig6"
+  command -v kwriteconfig6 &>/dev/null || KWC="kwriteconfig5"
+
   # KDE Plasma DND via dbus
-  if command -v qdbus &>/dev/null; then
-    qdbus org.freedesktop.Notifications /org/freedesktop/Notifications \
+  if command -v "$QDBUS" &>/dev/null; then
+    $QDBUS org.freedesktop.Notifications /org/freedesktop/Notifications \
       org.freedesktop.Notifications.Inhibit "edpear-focus" "Focus mode active" \
       2>/dev/null || true
   fi
   # Also try kwriteconfig for persistent setting
-  if command -v kwriteconfig5 &>/dev/null; then
-    kwriteconfig5 --file kloggingrc --group Logging --key DoNotDisturb true 2>/dev/null || true
+  if command -v "$KWC" &>/dev/null; then
+    $KWC --file kloggingrc --group Logging --key DoNotDisturb true 2>/dev/null || true
   fi
   # dunst (Hyprland) DND
   if command -v dunstctl &>/dev/null; then
@@ -72,8 +77,10 @@ disable_dnd() {
   if command -v dunstctl &>/dev/null; then
     dunstctl set-paused false 2>/dev/null || true
   fi
-  if command -v kwriteconfig5 &>/dev/null; then
-    kwriteconfig5 --file kloggingrc --group Logging --key DoNotDisturb false 2>/dev/null || true
+  local KWC="kwriteconfig6"
+  command -v kwriteconfig6 &>/dev/null || KWC="kwriteconfig5"
+  if command -v "$KWC" &>/dev/null; then
+    $KWC --file kloggingrc --group Logging --key DoNotDisturb false 2>/dev/null || true
   fi
   log "Do Not Disturb disabled"
 }
@@ -117,7 +124,7 @@ _apply_hosts() {
 
 enable_webblock() {
   if [ "$(id -u)" -ne 0 ]; then
-    pkexec "$0" _apply_hosts on
+    sudo "$0" _apply_hosts on
   else
     _apply_hosts on
   fi
@@ -125,7 +132,7 @@ enable_webblock() {
 
 disable_webblock() {
   if [ "$(id -u)" -ne 0 ]; then
-    pkexec "$0" _apply_hosts off
+    sudo "$0" _apply_hosts off
   else
     _apply_hosts off
   fi
@@ -133,19 +140,29 @@ disable_webblock() {
 
 # ── Blue Light Filter ──
 enable_nightlight() {
+  local KWC="kwriteconfig6"
+  command -v kwriteconfig6 &>/dev/null || KWC="kwriteconfig5"
+  local QDBUS="qdbus6"
+  command -v qdbus6 &>/dev/null || QDBUS="qdbus"
+
   # KDE Night Color
-  if command -v kwriteconfig5 &>/dev/null; then
-    kwriteconfig5 --file kwinrc --group NightColor --key Active true
-    kwriteconfig5 --file kwinrc --group NightColor --key NightTemperature 3500
-    qdbus org.kde.KWin /KWin reconfigure 2>/dev/null || true
+  if command -v "$KWC" &>/dev/null; then
+    $KWC --file kwinrc --group NightColor --key Active true
+    $KWC --file kwinrc --group NightColor --key NightTemperature 3500
+    $QDBUS org.kde.KWin /KWin reconfigure 2>/dev/null || true
   fi
   log "Blue light filter enabled"
 }
 
 disable_nightlight() {
-  if command -v kwriteconfig5 &>/dev/null; then
-    kwriteconfig5 --file kwinrc --group NightColor --key Active false
-    qdbus org.kde.KWin /KWin reconfigure 2>/dev/null || true
+  local KWC="kwriteconfig6"
+  command -v kwriteconfig6 &>/dev/null || KWC="kwriteconfig5"
+  local QDBUS="qdbus6"
+  command -v qdbus6 &>/dev/null || QDBUS="qdbus"
+
+  if command -v "$KWC" &>/dev/null; then
+    $KWC --file kwinrc --group NightColor --key Active false
+    $QDBUS org.kde.KWin /KWin reconfigure 2>/dev/null || true
   fi
   log "Blue light filter disabled"
 }

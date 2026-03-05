@@ -166,6 +166,44 @@ echo "==> Setting up liveuser home directory..."
 mkdir -p "$PROFILE_DIR/airootfs/home/liveuser"
 cp -rT "$PROFILE_DIR/airootfs/etc/skel" "$PROFILE_DIR/airootfs/home/liveuser"
 
+# ── Refresh edpearos-desktop theme (optional, fetch latest) ──
+echo "==> Checking edpearos-desktop theme..."
+DESKTOP_REPO="https://github.com/aarushk09/edpearos-desktop.git"
+DESKTOP_TMP="/tmp/edpearos-desktop"
+if command -v git &>/dev/null; then
+  if git clone --depth 1 "$DESKTOP_REPO" "$DESKTOP_TMP" 2>/dev/null; then
+    echo "  Refreshing theme files from edpearos-desktop repo..."
+    # Color scheme
+    cp -f "$DESKTOP_TMP/color-schemes/"*.colors \
+      "$PROFILE_DIR/airootfs/usr/share/color-schemes/" 2>/dev/null || true
+    # Look-and-feel package
+    cp -rf "$DESKTOP_TMP/look-and-feel/org.edpearos.desktop" \
+      "$PROFILE_DIR/airootfs/usr/share/plasma/look-and-feel/" 2>/dev/null || true
+    # SDDM theme
+    cp -rf "$DESKTOP_TMP/sddm/edpearos/"* \
+      "$PROFILE_DIR/airootfs/usr/share/sddm/themes/edpearos/" 2>/dev/null || true
+    # Konsole profile + colorscheme
+    cp -f "$DESKTOP_TMP/konsole/"* \
+      "$PROFILE_DIR/airootfs/usr/share/konsole/" 2>/dev/null || true
+    # Icon
+    cp -f "$DESKTOP_TMP/icons/edpearos.svg" \
+      "$PROFILE_DIR/airootfs/usr/share/icons/hicolor/scalable/apps/" 2>/dev/null || true
+    # Apply script
+    cp -f "$DESKTOP_TMP/scripts/apply-theme.sh" \
+      "$PROFILE_DIR/airootfs/usr/share/edpearos/apply-theme.sh" 2>/dev/null || true
+    # GTK settings
+    for ver in gtk-3.0 gtk-4.0; do
+      [ -f "$DESKTOP_TMP/$ver/settings.ini" ] && \
+        cp -f "$DESKTOP_TMP/$ver/settings.ini" \
+          "$PROFILE_DIR/airootfs/etc/skel/.config/$ver/settings.ini" 2>/dev/null || true
+    done
+    rm -rf "$DESKTOP_TMP"
+    echo "  Theme files refreshed from upstream"
+  else
+    echo "  Using bundled theme files (git clone failed, offline build)"
+  fi
+fi
+
 # ── Build ISO ──
 echo ""
 echo "==> Building edpearOS ISO with mkarchiso..."

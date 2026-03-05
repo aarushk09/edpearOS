@@ -1,0 +1,3 @@
+# edpearOS — liveuser sudo configuration
+# Allow the live session user full sudo without password
+liveuser ALL=(ALL) NOPASSWD: ALL

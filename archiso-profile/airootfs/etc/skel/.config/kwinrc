@@ -32,3 +32,11 @@ AnimationSpeed=3
 blurEnabled=true
 contrastEnabled=true
 dimscreenEnabled=true
+overviewEnabled=true
+slideEnabled=true
+
+[org.kde.kdecoration2]
+library=org.kde.breeze
+theme=Breeze
+ButtonsOnLeft=M
+ButtonsOnRight=IAX

@@ -8,3 +8,4 @@ Type=Application
 Categories=Utility;
 Keywords=welcome;study;workspace;student;
 StartupWMClass=edpear-welcome
+StartupNotify=true

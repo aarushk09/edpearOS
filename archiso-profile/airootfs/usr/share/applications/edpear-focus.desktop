@@ -7,3 +7,4 @@ Terminal=false
 Type=Application
 Categories=Utility;
 Keywords=focus;dnd;block;productivity;study;
+StartupNotify=true

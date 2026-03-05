@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=edpearOS Theme
+Exec=/usr/share/edpearos/apply-theme.sh
+Hidden=false
+X-KDE-autostart-phase=2
+X-KDE-autostart-after=panel
+X-GNOME-Autostart-enabled=true
+Comment=Apply edpearOS Tokyo Night theme on first login
