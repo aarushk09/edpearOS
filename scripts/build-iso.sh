@@ -125,20 +125,39 @@ fi
 echo "==> Creating systemd service enable symlinks..."
 mkdir -p "$PROFILE_DIR/airootfs/etc/systemd/system/multi-user.target.wants"
 mkdir -p "$PROFILE_DIR/airootfs/etc/systemd/system/timers.target.wants"
+mkdir -p "$PROFILE_DIR/airootfs/etc/systemd/system/sockets.target.wants"
+mkdir -p "$PROFILE_DIR/airootfs/etc/systemd/system/sysinit.target.wants"
+mkdir -p "$PROFILE_DIR/airootfs/etc/systemd/system-generators"
 
-# SDDM — display manager
+# -- Disable GPT auto-generator (interferes with live boot) --
+ln -sf /dev/null \
+  "$PROFILE_DIR/airootfs/etc/systemd/system-generators/systemd-gpt-auto-generator"
+
+# -- SDDM display manager --
 ln -sf /usr/lib/systemd/system/sddm.service \
   "$PROFILE_DIR/airootfs/etc/systemd/system/display-manager.service"
 
-# NetworkManager
+# -- NetworkManager --
 ln -sf /usr/lib/systemd/system/NetworkManager.service \
   "$PROFILE_DIR/airootfs/etc/systemd/system/multi-user.target.wants/NetworkManager.service"
 
-# Bluetooth
+# -- Bluetooth --
 ln -sf /usr/lib/systemd/system/bluetooth.service \
   "$PROFILE_DIR/airootfs/etc/systemd/system/multi-user.target.wants/bluetooth.service"
 
-# Periodic TRIM for SSDs
+# -- Pacman keyring init --
+ln -sf /etc/systemd/system/pacman-init.service \
+  "$PROFILE_DIR/airootfs/etc/systemd/system/multi-user.target.wants/pacman-init.service"
+
+# -- IWD (wireless) --
+ln -sf /usr/lib/systemd/system/iwd.service \
+  "$PROFILE_DIR/airootfs/etc/systemd/system/multi-user.target.wants/iwd.service"
+
+# -- Time sync --
+ln -sf /usr/lib/systemd/system/systemd-timesyncd.service \
+  "$PROFILE_DIR/airootfs/etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service"
+
+# -- Periodic TRIM for SSDs --
 ln -sf /usr/lib/systemd/system/fstrim.timer \
   "$PROFILE_DIR/airootfs/etc/systemd/system/timers.target.wants/fstrim.timer"
 

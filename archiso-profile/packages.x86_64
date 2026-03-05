@@ -18,6 +18,7 @@ dosfstools
 btrfs-progs
 e2fsprogs
 xfsprogs
+syslinux
 
 # --- Boot & Init ---
 systemd
@@ -99,12 +100,12 @@ swappy
 xdg-desktop-portal-hyprland
 polkit-kde-agent
 
-# --- Calamares Installer ---
-calamares
+# --- Installer ---
+archinstall
 
 # --- Student Productivity Stack ---
 libreoffice-fresh
-obsidian-bin
+obsidian
 zotero-bin
 firefox
 chromium
@@ -120,7 +121,7 @@ python-gobject
 python-virtualenv
 nodejs
 npm
-visual-studio-code-bin
+code
 github-cli
 cmake
 gcc
