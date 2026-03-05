@@ -79,26 +79,24 @@ fi
 # Update pacman databases
 pacman -Sy
 
-# ── Generate placeholder wallpaper if not present ──
-echo "==> Checking wallpaper assets..."
+# ── Generate wallpaper (bake directly into airootfs) ──
+echo "==> Generating Tokyo Night wallpaper..."
 WALLPAPER_DIR="${PROFILE_DIR}/airootfs/usr/share/edpearos/wallpapers"
 mkdir -p "$WALLPAPER_DIR"
 if [ ! -f "$WALLPAPER_DIR/default.png" ]; then
-  echo "  Generating placeholder wallpaper..."
-  if command -v convert &>/dev/null; then
+  if command -v python3 &>/dev/null; then
+    echo "  Using Python generator..."
+    python3 "${SCRIPT_DIR}/generate-wallpaper.py" "$WALLPAPER_DIR/default.png" 1920 1080
+  elif command -v convert &>/dev/null; then
+    echo "  Using ImageMagick fallback..."
     convert -size 1920x1080 \
       'gradient:#1a1b26-#24283b' \
-      -gravity center \
-      -fill '#7aa2f7' -font 'DejaVu-Sans-Bold' -pointsize 72 \
-      -annotate 0 'edpearOS' \
-      -fill '#565f89' -pointsize 24 \
-      -annotate +0+60 'The Modern Student Desktop' \
       "$WALLPAPER_DIR/default.png"
   else
-    echo "  WARNING: ImageMagick not installed. Using empty wallpaper."
-    # Create a minimal 1x1 PNG (will be stretched)
-    printf '\x89PNG\r\n\x1a\n' > "$WALLPAPER_DIR/default.png"
+    echo "  WARNING: No generator available — theme will use default KDE wallpaper"
   fi
+else
+  echo "  Wallpaper already exists, skipping"
 fi
 
 # ── Generate Calamares branding logo if not present ──

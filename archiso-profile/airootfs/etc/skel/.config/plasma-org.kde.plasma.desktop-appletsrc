@@ -1,9 +1,11 @@
 [Containments][1]
 activityId=
+floating=1
 formfactor=2
 immutability=1
 lastScreen=0
 location=4
+panelOpacity=2
 plugin=org.kde.panel
 wallpaperplugin=org.kde.image
 
@@ -11,27 +13,43 @@ wallpaperplugin=org.kde.image
 immutability=1
 plugin=org.kde.plasma.kickoff
 
+[Containments][1][Applets][2][Configuration][General]
+icon=edpearos
+alphaSort=true
+
 [Containments][1][Applets][3]
 immutability=1
 plugin=org.kde.plasma.icontasks
 
 [Containments][1][Applets][3][Configuration][General]
 launchers=applications:org.kde.dolphin.desktop,applications:firefox.desktop,applications:obsidian.desktop,applications:org.kde.konsole.desktop,applications:org.kde.kate.desktop,applications:libreoffice-writer.desktop,applications:edpear-welcome.desktop,applications:edpear-focus.desktop,applications:calamares-install.desktop
+maxStripes=1
+showOnlyCurrentDesktop=false
+showOnlyCurrentActivity=false
 
 [Containments][1][Applets][4]
 immutability=1
-plugin=org.kde.plasma.marginsseparator
+plugin=org.kde.plasma.panelspacer
 
 [Containments][1][Applets][5]
 immutability=1
 plugin=org.kde.plasma.systemtray
 
+[Containments][1][Applets][5][Configuration][General]
+shownItems=org.kde.plasma.battery,org.kde.plasma.volume,org.kde.plasma.networkmanagement,org.kde.plasma.bluetooth
+
 [Containments][1][Applets][6]
 immutability=1
 plugin=org.kde.plasma.digitalclock
 
+[Containments][1][Applets][6][Configuration][Appearance]
+showDate=true
+dateFormat=shortDate
+use24hFormat=0
+
 [Containments][1][General]
 AppletOrder=2;3;4;5;6
+thickness=56
 
 [Containments][7]
 activityId=default

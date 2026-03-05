@@ -14,25 +14,52 @@ fi
 
 echo "[edpearOS] Applying desktop theme..."
 
-# ── Apply color scheme ──
+# Detect kwriteconfig version
+KWC="kwriteconfig6"
+command -v kwriteconfig6 &>/dev/null || KWC="kwriteconfig5"
+QDBUS="qdbus6"
+command -v qdbus6 &>/dev/null || QDBUS="qdbus"
+
+# ── Pre-write all config files before applying ──
+mkdir -p "$HOME/.config"
+
+# Color scheme
+$KWC --file kdeglobals --group General --key ColorScheme EdpearOSTokyo
+# Icons
+$KWC --file kdeglobals --group Icons --key Theme Papirus-Dark
+# Plasma look-and-feel
+$KWC --file kdeglobals --group KDE --key LookAndFeelPackage org.edpearos.desktop
+# Kvantum widget style
+$KWC --file kdeglobals --group KDE --key widgetStyle kvantum
+# Desktop theme  
+$KWC --file plasmarc --group Theme --key name breeze-dark
+# KWin decoration
+$KWC --file kwinrc --group "org.kde.kdecoration2" --key library org.kde.breeze
+$KWC --file kwinrc --group "org.kde.kdecoration2" --key theme Breeze
+# Splash
+$KWC --file ksplashrc --group KSplash --key Theme org.edpearos.desktop
+$KWC --file ksplashrc --group KSplash --key Engine none
+# Konsole default profile
+$KWC --file konsolerc --group "Desktop Entry" --key DefaultProfile edpearos.profile
+# Kvantum
+mkdir -p "$HOME/.config/Kvantum"
+echo -e '[General]\ntheme=KvArcDark' > "$HOME/.config/Kvantum/kvantum.kvconfig"
+
+# ── Apply via plasma-apply-* tools ──
 if command -v plasma-apply-colorscheme &>/dev/null; then
     plasma-apply-colorscheme EdpearOSTokyo 2>/dev/null || true
     echo "[edpearOS] Color scheme applied"
 fi
 
-# ── Apply Plasma theme (breeze-dark) ──
 if command -v plasma-apply-desktoptheme &>/dev/null; then
     plasma-apply-desktoptheme breeze-dark 2>/dev/null || true
-    echo "[edpearOS] Desktop theme applied"
 fi
 
-# ── Apply look-and-feel ──
 if command -v plasma-apply-lookandfeel &>/dev/null; then
     plasma-apply-lookandfeel -a org.edpearos.desktop 2>/dev/null || true
     echo "[edpearOS] Look-and-feel applied"
 fi
 
-# ── Apply wallpaper ──
 if command -v plasma-apply-wallpaperimage &>/dev/null; then
     if [ -f /usr/share/edpearos/wallpapers/default.png ]; then
         plasma-apply-wallpaperimage /usr/share/edpearos/wallpapers/default.png 2>/dev/null || true
@@ -40,23 +67,12 @@ if command -v plasma-apply-wallpaperimage &>/dev/null; then
     fi
 fi
 
-# ── Apply cursor theme ──
 if command -v plasma-apply-cursortheme &>/dev/null; then
     plasma-apply-cursortheme breeze_cursors 2>/dev/null || true
 fi
 
-# ── Set icon theme via kwriteconfig ──
-if command -v kwriteconfig6 &>/dev/null; then
-    kwriteconfig6 --file kdeglobals --group Icons --key Theme Papirus-Dark
-    echo "[edpearOS] Icon theme set to Papirus-Dark"
-elif command -v kwriteconfig5 &>/dev/null; then
-    kwriteconfig5 --file kdeglobals --group Icons --key Theme Papirus-Dark
-fi
-
-# ── Set Konsole defaults ──
-if command -v kwriteconfig6 &>/dev/null; then
-    kwriteconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile edpearos.profile
-fi
+# ── Reload KWin for immediate decoration effect ──
+$QDBUS org.kde.KWin /KWin reconfigure 2>/dev/null || true
 
 # ── GTK dark theme ──
 mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0"
