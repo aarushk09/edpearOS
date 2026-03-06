@@ -219,7 +219,7 @@ echo "==> Building edpearOS ISO with mkarchiso..."
 echo "    This will download packages and may take 15-30 minutes."
 echo ""
 
-yes | mkarchiso -v -w "$WORK_DIR" -o "$OUT_DIR" "$PROFILE_DIR"
+mkarchiso -v -w "$WORK_DIR" -o "$OUT_DIR" "$PROFILE_DIR"
 
 # ── Rename output ISO ──
 ISO_FILE=$(find "$OUT_DIR" -name "edpearOS-*.iso" -type f | head -1)
