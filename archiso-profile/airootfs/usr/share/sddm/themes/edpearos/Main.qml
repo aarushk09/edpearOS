@@ -104,9 +104,9 @@ Rectangle {
         width: 380
         height: loginColumn.implicitHeight + 80
         radius: 16
-        color: Qt.rgba(surfaceColor.r/255, surfaceColor.g/255, surfaceColor.b/255, 0.85)
+        color: Qt.rgba(surfaceColor.r, surfaceColor.g, surfaceColor.b, 0.85)
         border.width: 1
-        border.color: Qt.rgba(borderColor.r/255, borderColor.g/255, borderColor.b/255, 0.3)
+        border.color: Qt.rgba(borderColor.r, borderColor.g, borderColor.b, 0.3)
 
         // Subtle inner shadow
         Rectangle {
@@ -248,42 +248,14 @@ Rectangle {
                 onClicked: doLogin()
             }
 
-            // Session selector
-            RowLayout {
-                Layout.alignment: Qt.AlignHCenter
-                spacing: 8
-
-                Text {
-                    text: "Session:"
-                    font.pixelSize: 11
-                    font.family: "Noto Sans"
-                    color: fgDimColor
-                }
-
-                ComboBox {
-                    id: sessionBox
-                    model: sessionModel
-                    textRole: "name"
-                    currentIndex: sessionModel.lastIndex
-                    font.pixelSize: 11
-
-                    contentItem: Text {
-                        text: sessionBox.displayText
-                        font: sessionBox.font
-                        color: accentColor
-                        verticalAlignment: Text.AlignVCenter
-                        leftPadding: 8
-                    }
-
-                    background: Rectangle {
-                        radius: 6
-                        color: "transparent"
-                        border.width: 1
-                        border.color: borderColor
-                        implicitWidth: 140
-                        implicitHeight: 28
-                    }
-                }
+            // Session selector (hidden — single session)
+            ComboBox {
+                id: sessionBox
+                model: sessionModel
+                textRole: "name"
+                currentIndex: sessionModel.lastIndex
+                visible: false
+                width: 0; height: 0
             }
         }
     }

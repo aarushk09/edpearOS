@@ -5,4 +5,5 @@ video:x:985:liveuser
 network:x:90:liveuser
 storage:x:98:liveuser
 rfkill:x:983:liveuser
+autologin:x:984:liveuser
 liveuser:x:1000:
