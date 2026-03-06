@@ -1,0 +1,35 @@
+# Force LF line endings for all text files in this repo.
+# This is critical: archiso profile files (presets, scripts, configs)
+# must use LF or they break in the Linux chroot at build time.
+
+* text=auto eol=lf
+
+# Explicitly mark shell scripts and configs as LF
+*.sh        text eol=lf
+*.preset    text eol=lf
+*.conf      text eol=lf
+*.service   text eol=lf
+*.desktop   text eol=lf
+*.ini       text eol=lf
+*.cfg       text eol=lf
+*.py        text eol=lf
+*.json      text eol=lf
+*.lua       text eol=lf
+*.rules     text eol=lf
+*.md        text eol=lf
+*.txt       text eol=lf
+Makefile    text eol=lf
+control     text eol=lf
+
+# Binary files — no EOL conversion
+*.iso       binary
+*.img       binary
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.ico       binary
+*.gz        binary
+*.xz        binary
+*.zst       binary
+*.deb       binary
+*.tar       binary

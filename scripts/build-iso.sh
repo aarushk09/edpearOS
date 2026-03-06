@@ -202,6 +202,17 @@ if command -v git &>/dev/null; then
   fi
 fi
 
+# ── Strip Windows CRLF line endings from all profile text files ──
+# (Files synced from NTFS can retain \r, which breaks bash scripts in the chroot)
+echo "==> Stripping CRLF line endings from airootfs..."
+find "$PROFILE_DIR" -type f \
+  \( -name "*.sh" -o -name "*.preset" -o -name "*.conf" -o -name "*.service" \
+     -o -name "*.desktop" -o -name "*.ini" -o -name "*.cfg" -o -name "*.py" \
+     -o -name "*.txt" -o -name "*.json" -o -name "*.lua" -o -name "*.rules" \
+     -o -name "control" -o -name "profiledef.sh" \) \
+  -exec sed -i 's/\r//' {} +
+echo "    Done."
+
 # ── Build ISO ──
 echo ""
 echo "==> Building edpearOS ISO with mkarchiso..."
