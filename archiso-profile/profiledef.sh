@@ -31,5 +31,6 @@ file_permissions=(
   ["/usr/local/bin/edpear-setup"]="0:0:755"
   ["/usr/share/edpearos/apply-theme.sh"]="0:0:755"
   ["/etc/xdg/plasma-workspace/env/edpearos.sh"]="0:0:755"
+  ["/root/customize_airootfs.sh"]="0:0:755"
   ["/home/liveuser"]="1000:1000:750"
 )
