@@ -1,75 +1,73 @@
-#!/usr/bin/env bash
-# ═══════════════════════════════════════════════════════════════
-# edpearOS — Chroot Customization Hook
-# Runs inside the archiso chroot after all packages are installed.
-# mkarchiso automatically executes this file at /root/customize_airootfs.sh
-# ═══════════════════════════════════════════════════════════════
-set -e -u
+﻿#!/usr/bin/env bash
+# customization hook - runs in arch-chroot after package install
+# NOTE: /proc /sys not mounted here. Use sed for shadow edits, not passwd.
+set -u
 
 echo "==> [edpearOS] customize_airootfs: starting..."
 
-# ── liveuser: home directory ──────────────────────────────────
+# liveuser home
 echo "==> Setting up liveuser home..."
-if id liveuser &>/dev/null; then
+if id liveuser >/dev/null 2>&1; then
     mkdir -p /home/liveuser
-    # Copy skeleton (dotfiles, config dirs)
-    cp -rT /etc/skel /home/liveuser
+    if [ -z "" ]; then
+        cp -rT /etc/skel /home/liveuser 2>/dev/null || true
+    fi
     chown -R liveuser:liveuser /home/liveuser
     chmod 750 /home/liveuser
 fi
 
-# ── liveuser: group memberships ──────────────────────────────
+# liveuser groups
 echo "==> Setting liveuser group memberships..."
 for grp in wheel video audio storage optical network lp scanner sys rfkill input; do
-    groupadd -f "$grp" 2>/dev/null || true
-    usermod -aG "$grp" liveuser 2>/dev/null || true
+    groupadd -f "" 2>/dev/null || true
+    usermod -aG "" liveuser 2>/dev/null || true
 done
 
-# ── liveuser: remove password (empty = autologin works) ──────
-echo "==> Removing liveuser password..."
-passwd -d liveuser
+# Remove passwords via direct shadow edit (no /proc needed)
+echo "==> Removing passwords via /etc/shadow..."
+if [ -f /etc/shadow ]; then
+    sed -i 's|^liveuser:[^:]*:|liveuser::|' /etc/shadow
+    sed -i 's|^root:[^:]*:|root::|'        /etc/shadow
+    echo "==> shadow updated"
+fi
 
-# ── Session cleanup: remove all but Plasma Wayland ───────────
-# Packages (hyprland, plasma) install their own .desktop files.
-# Remove everything except plasma.desktop (KDE Plasma 6 Wayland).
+# Session cleanup: keep only plasma.desktop
 echo "==> Cleaning up session desktop files..."
-
-# Wayland sessions: keep only plasma.desktop
-find /usr/share/wayland-sessions -name '*.desktop' \
-    ! -name 'plasma.desktop' -delete 2>/dev/null || true
-
-# X11 sessions: remove all (we are Wayland-only)
+find /usr/share/wayland-sessions -name '*.desktop' ! -name 'plasma.desktop' -delete 2>/dev/null || true
 rm -f /usr/share/xsessions/*.desktop 2>/dev/null || true
-
-# Also clean any leftover Hyprland/UWSM wrappers
-rm -f /usr/share/wayland-sessions/hyprland.desktop     2>/dev/null || true
-rm -f /usr/share/wayland-sessions/hyprland-uwsm.desktop 2>/dev/null || true
-
 echo "==> Remaining wayland-sessions:"
-ls /usr/share/wayland-sessions/ 2>/dev/null
+ls /usr/share/wayland-sessions/ 2>/dev/null || true
 
-# ── Set correct Plasma session name in SDDM ──────────────────
-# Verify plasma.desktop exists; if Plasma 6 uses a different name, patch conf.
+# Auto-detect plasma session name if renamed
 if [ ! -f /usr/share/wayland-sessions/plasma.desktop ]; then
-    # Fallback: find whatever Plasma session file exists
-    PLASMA_SESSION=$(find /usr/share/wayland-sessions -iname '*plasma*' -name '*.desktop' | head -1)
-    if [ -n "$PLASMA_SESSION" ]; then
-        SESSION_NAME="$(basename "$PLASMA_SESSION" .desktop)"
-        sed -i "s/^Session=.*/Session=${SESSION_NAME}/" /etc/sddm.conf.d/edpearos.conf
-        echo "==> SDDM session set to: ${SESSION_NAME}"
+    found=
+    if [ -n "" ]; then
+        sname=
+        sed -i "s/^Session=.*/Session=/" /etc/sddm.conf.d/edpearos.conf 2>/dev/null || true
+        echo "==> SDDM session auto-set to: "
     fi
 fi
 
-# ── Enable systemd services ───────────────────────────────────
+# Enable systemd services via symlinks (no running systemd needed)
 echo "==> Enabling systemd services..."
-systemctl enable sddm.service          2>/dev/null || true
-systemctl enable NetworkManager.service 2>/dev/null || true
-systemctl enable bluetooth.service     2>/dev/null || true
-systemctl enable avahi-daemon.service  2>/dev/null || true
+_enable() {
+    local svc="" target=""
+    local wants_dir="/etc/systemd/system/.wants"
+    local unit; unit=
+    if [ -n "" ]; then
+        mkdir -p ""
+        ln -sf "" "/" 2>/dev/null || true
+        echo "  enabled:  -> "
+    fi
+}
+_enable sddm.service          graphical.target
+_enable NetworkManager.service
+_enable bluetooth.service
+_enable avahi-daemon.service
 
-# ── Sudoers: ensure wheel has NOPASSWD ───────────────────────
-if ! grep -q 'NOPASSWD' /etc/sudoers 2>/dev/null; then
-    echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers
+# Sudoers NOPASSWD for wheel
+if [ -f /etc/sudoers ]; then
+    grep -q 'NOPASSWD' /etc/sudoers || echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers
 fi
 
 echo "==> [edpearOS] customize_airootfs: done."
