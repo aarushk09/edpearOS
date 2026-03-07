@@ -79,6 +79,33 @@ _enable avahi-daemon.service    multi-user.target
 ln -sf /usr/lib/systemd/system/graphical.target /etc/systemd/system/default.target 2>/dev/null || true
 echo "==> default.target -> graphical.target"
 
+# ── SDDM as the only display-manager (mask plasma-login-manager) ──
+echo "==> Setting SDDM as the display manager..."
+mkdir -p /etc/systemd/system
+ln -sf /usr/lib/systemd/system/sddm.service /etc/systemd/system/display-manager.service 2>/dev/null || true
+# Mask plasmalogin so it cannot start (plasma-meta pulls it in)
+if [ -f /usr/lib/systemd/system/plasmalogin.service ]; then
+    ln -sf /dev/null /etc/systemd/system/plasmalogin.service 2>/dev/null || true
+    echo "  masked plasmalogin.service"
+fi
+echo "  display-manager.service -> sddm.service"
+
+# ── Verify SDDM config exists ──
+echo "==> Verifying SDDM configuration..."
+if [ -f /etc/sddm.conf.d/edpearos.conf ]; then
+    echo "  SDDM config found:"
+    cat /etc/sddm.conf.d/edpearos.conf
+else
+    echo "  WARNING: /etc/sddm.conf.d/edpearos.conf is MISSING!"
+fi
+
+# ── Verify SDDM theme exists ──
+if [ -d /usr/share/sddm/themes/edpearos ]; then
+    echo "  SDDM theme found: $(ls /usr/share/sddm/themes/edpearos/)"
+else
+    echo "  WARNING: /usr/share/sddm/themes/edpearos/ is MISSING!"
+fi
+
 # ── Sudoers NOPASSWD for wheel ──
 if [ -f /etc/sudoers ]; then
     grep -q 'NOPASSWD' /etc/sudoers || echo '%wheel ALL=(ALL:ALL) NOPASSWD: ALL' >> /etc/sudoers
