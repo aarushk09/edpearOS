@@ -67,26 +67,43 @@ chown root:shadow /etc/shadow
 chmod 640 /etc/shadow
 echo "==> /etc/shadow permissions: $(stat -c '%a %U:%G' /etc/shadow)"
 
-# ── PAM: permit autologin without password for live ISO ──
-# Prepend 'auth sufficient pam_permit.so' to system-local-login so that
-# getty --autologin never hits pam_unix shadow lookup failures.
-echo "==> Patching PAM system-local-login for passwordless autologin..."
-if [ -f /etc/pam.d/system-local-login ]; then
-    if ! grep -q 'pam_permit' /etc/pam.d/system-local-login; then
-        sed -i '1s|^|auth      sufficient  pam_permit.so\n|' /etc/pam.d/system-local-login
-        echo "  injected pam_permit.so into system-local-login"
-    fi
-else
-    cat > /etc/pam.d/system-local-login << 'PAMEOF'
+# ── PAM: fully permissive login for live ISO ──
+# agetty --autologin calls /bin/login -f (force — skips auth phase entirely).
+# PAM account phase still runs and pam_unix.so calls PAM_AUTHINFO_UNAVAIL when
+# it can't look up the shadow entry. Fix: rewrite both login and system-local-login
+# with account sufficient pam_permit.so so the account phase always passes.
+echo "==> Rewriting PAM login + system-local-login for live ISO autologin..."
+
+cat > /etc/pam.d/system-local-login << 'PAMEOF'
 #%PAM-1.0
+# edpearOS live ISO — fully permissive, no password required
 auth      sufficient  pam_permit.so
-auth      include     system-auth
-account   include     system-auth
-password  include     system-auth
-session   include     system-auth
+auth      required    pam_permit.so
+account   sufficient  pam_permit.so
+account   required    pam_permit.so
+password  sufficient  pam_permit.so
+password  required    pam_permit.so
+session   required    pam_limits.so
+session   optional    pam_systemd.so
+session   optional    pam_motd.so   motd=/etc/motd
 PAMEOF
-    echo "  created /etc/pam.d/system-local-login with pam_permit.so"
-fi
+
+# Also overwrite /etc/pam.d/login which is what /bin/login actually uses
+cat > /etc/pam.d/login << 'PAMEOF'
+#%PAM-1.0
+# edpearOS live ISO — fully permissive, no password required
+auth      sufficient  pam_permit.so
+auth      required    pam_permit.so
+account   sufficient  pam_permit.so
+account   required    pam_permit.so
+password  sufficient  pam_permit.so
+password  required    pam_permit.so
+session   required    pam_limits.so
+session   optional    pam_systemd.so
+session   optional    pam_motd.so   motd=/etc/motd
+PAMEOF
+
+echo "  /etc/pam.d/login and system-local-login rewritten (account sufficient pam_permit.so)"
 
 # ── Session cleanup: keep only plasma.desktop ──
 echo "==> Cleaning up session desktop files..."
