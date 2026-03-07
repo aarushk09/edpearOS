@@ -20,15 +20,6 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PROFILE_DIR="${REPO_ROOT}/archiso-profile"
 WORK_DIR="${REPO_ROOT}/work"
 OUT_DIR="${REPO_ROOT}/out"
-CLEAN_BUILD=0
-
-while [[ "$#" -gt 0 ]]; do
-  case $1 in
-    --clean) CLEAN_BUILD=1 ;;
-    *) echo "Unknown parameter: $1"; exit 1 ;;
-  esac
-  shift
-done
 
 # ── Checks ──
 if [ "$(id -u)" -ne 0 ]; then
@@ -50,11 +41,11 @@ echo "Work:    $WORK_DIR"
 echo "Output:  $OUT_DIR"
 echo ""
 
-# ── Clean previous build ──
-if [ "$CLEAN_BUILD" -eq 1 ]; then
-  echo "==> Cleaning previous build..."
-  rm -rf "$WORK_DIR" "$OUT_DIR"
-fi
+# ── Always clean previous build for reliability ──
+# mkarchiso's incremental builds are fragile (cleanup deletes /boot, etc.)
+# Always start fresh to avoid stale state issues.
+echo "==> Cleaning previous build artifacts..."
+rm -rf "$WORK_DIR" "$OUT_DIR"
 
 mkdir -p "$OUT_DIR"
 
@@ -212,29 +203,6 @@ find "$PROFILE_DIR" -type f \
      -o -name "*.qml" -o -name "profiledef.sh" \) \
   -exec sed -i 's/\r//' {} +
 echo "    Done."
-
-# ── Always re-apply overlay & customize on incremental builds ──
-# mkarchiso uses marker files to skip completed steps. When the profile
-# changes between builds, the overlay/customize/image steps MUST re-run.
-# We keep the packages marker so package downloads are cached.
-if [ -d "$WORK_DIR" ] && [ "$CLEAN_BUILD" -eq 0 ]; then
-  echo "==> Clearing stale build markers (keeping package cache)..."
-  rm -f "$WORK_DIR/base._make_custom_airootfs"
-  rm -f "$WORK_DIR/base._make_customize_airootfs"
-  rm -f "$WORK_DIR/base._mkairootfs_squashfs"
-  rm -f "$WORK_DIR/base._prepare_airootfs_image"
-  rm -f "$WORK_DIR/base._check_if_initramfs_has_ucode"
-  rm -f "$WORK_DIR/base._make_bootmode_bios.syslinux"
-  rm -f "$WORK_DIR/base._make_bootmode_uefi.grub"
-  rm -f "$WORK_DIR/base._make_boot_on_iso9660"
-  rm -f "$WORK_DIR/base._make_common_bootmode_grub_cfg"
-  rm -f "$WORK_DIR/base._make_version"
-  rm -f "$WORK_DIR/base._make_pkglist"
-  rm -f "$WORK_DIR/build._build_buildmode_iso"
-  # Remove old squashfs and ISO so they are rebuilt
-  rm -f "$WORK_DIR"/*.img "$WORK_DIR"/*.sfs 2>/dev/null || true
-  rm -f "$OUT_DIR"/edpearOS-*.iso "$OUT_DIR"/edpearOS-*.sha256 2>/dev/null || true
-fi
 
 # ── Build ISO ──
 echo ""
