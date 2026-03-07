@@ -2,6 +2,8 @@
 # edpearOS customize_airootfs.sh
 # Runs inside arch-chroot after package install.
 # NOTE: /proc and /sys are NOT mounted. Use sed for shadow, symlinks for services.
+# Login strategy: getty autologin on tty1 → .bash_profile → startplasma-wayland
+# SDDM is masked — no login screen.
 set -u
 
 echo "==> [edpearOS] customize_airootfs: starting..."
@@ -25,7 +27,7 @@ if id liveuser >/dev/null 2>&1; then
     chmod 750 /home/liveuser
 fi
 
-# ── Autologin group (SDDM requires this) ──
+# ── Autologin group ──
 echo "==> Creating autologin group..."
 groupadd -f autologin 2>/dev/null || true
 usermod -aG autologin liveuser 2>/dev/null || true
@@ -65,14 +67,7 @@ rm -f /usr/share/xsessions/*.desktop 2>/dev/null || true
 echo "==> Remaining wayland-sessions:"
 ls /usr/share/wayland-sessions/ 2>/dev/null || true
 
-# Auto-detect plasma session name if renamed
-if [ ! -f /usr/share/wayland-sessions/plasma.desktop ]; then
-    found="$(basename "$(ls /usr/share/wayland-sessions/*.desktop 2>/dev/null | head -1)" .desktop 2>/dev/null || true)"
-    if [ -n "$found" ]; then
-        sed -i "s/^Session=.*/Session=$found/" /etc/sddm.conf.d/edpearos.conf 2>/dev/null || true
-        echo "==> SDDM session auto-set to: $found"
-    fi
-fi
+
 
 # ── Enable systemd services via symlinks (no running systemd needed) ──
 echo "==> Enabling systemd services..."
@@ -90,7 +85,6 @@ _enable() {
         echo "  WARNING: unit file not found for $svc"
     fi
 }
-_enable sddm.service           graphical.target
 _enable NetworkManager.service  multi-user.target
 _enable bluetooth.service       multi-user.target
 _enable avahi-daemon.service    multi-user.target
@@ -99,32 +93,44 @@ _enable avahi-daemon.service    multi-user.target
 ln -sf /usr/lib/systemd/system/graphical.target /etc/systemd/system/default.target 2>/dev/null || true
 echo "==> default.target -> graphical.target"
 
-# ── SDDM as the only display-manager (mask plasma-login-manager) ──
-echo "==> Setting SDDM as the display manager..."
+# ── MASK sddm and plasmalogin — use getty autologin instead ──
+# SDDM theme QML errors + autologin failures are bypassed this way.
+echo "==> Masking SDDM and plasmalogin (using getty autologin)..."
 mkdir -p /etc/systemd/system
-ln -sf /usr/lib/systemd/system/sddm.service /etc/systemd/system/display-manager.service 2>/dev/null || true
-# Mask plasmalogin so it cannot start (plasma-meta pulls it in)
-if [ -f /usr/lib/systemd/system/plasmalogin.service ]; then
-    ln -sf /dev/null /etc/systemd/system/plasmalogin.service 2>/dev/null || true
-    echo "  masked plasmalogin.service"
-fi
-echo "  display-manager.service -> sddm.service"
+ln -sf /dev/null /etc/systemd/system/sddm.service 2>/dev/null || true
+ln -sf /dev/null /etc/systemd/system/plasmalogin.service 2>/dev/null || true
+# Remove display-manager.service if it points to sddm
+rm -f /etc/systemd/system/display-manager.service 2>/dev/null || true
+# Also mask graphical.target wants/sddm
+rm -f /etc/systemd/system/graphical.target.wants/sddm.service 2>/dev/null || true
+echo "  sddm.service -> /dev/null (masked)"
+echo "  plasmalogin.service -> /dev/null (masked)"
 
-# ── Verify SDDM config exists ──
-echo "==> Verifying SDDM configuration..."
-if [ -f /etc/sddm.conf.d/edpearos.conf ]; then
-    echo "  SDDM config found:"
-    cat /etc/sddm.conf.d/edpearos.conf
-else
-    echo "  WARNING: /etc/sddm.conf.d/edpearos.conf is MISSING!"
-fi
+# ── Getty autologin for tty1 ──
+echo "==> Setting up getty autologin for liveuser on tty1..."
+mkdir -p /etc/systemd/system/getty@tty1.service.d
+cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf << 'AUTOLOGIN'
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty -o '-p -f -- \u' --noclear --autologin liveuser %I $TERM
+Type=simple
+AUTOLOGIN
+echo "  getty@tty1 autologin configured"
 
-# ── Verify SDDM theme exists ──
-if [ -d /usr/share/sddm/themes/edpearos ]; then
-    echo "  SDDM theme found: $(ls /usr/share/sddm/themes/edpearos/)"
-else
-    echo "  WARNING: /usr/share/sddm/themes/edpearos/ is MISSING!"
+# ── Ensure .bash_profile is in liveuser home ──
+echo "==> Ensuring .bash_profile in liveuser home..."
+if [ -f /etc/skel/.bash_profile ] && [ ! -f /home/liveuser/.bash_profile ]; then
+    cp /etc/skel/.bash_profile /home/liveuser/.bash_profile
+    chown liveuser:liveuser /home/liveuser/.bash_profile
+    echo "  .bash_profile copied to /home/liveuser"
+elif [ -f /home/liveuser/.bash_profile ]; then
+    # Force overwrite from skel so it has the plasma start logic
+    cp /etc/skel/.bash_profile /home/liveuser/.bash_profile
+    chown liveuser:liveuser /home/liveuser/.bash_profile
+    echo "  .bash_profile refreshed in /home/liveuser"
 fi
+echo "  .bash_profile content:"
+cat /home/liveuser/.bash_profile 2>/dev/null || echo "  WARNING: not found!"
 
 # ── Sudoers NOPASSWD for wheel ──
 if [ -f /etc/sudoers ]; then

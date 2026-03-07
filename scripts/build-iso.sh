@@ -122,9 +122,8 @@ mkdir -p "$PROFILE_DIR/airootfs/etc/systemd/system-generators"
 ln -sf /dev/null \
   "$PROFILE_DIR/airootfs/etc/systemd/system-generators/systemd-gpt-auto-generator"
 
-# -- SDDM display manager --
-ln -sf /usr/lib/systemd/system/sddm.service \
-  "$PROFILE_DIR/airootfs/etc/systemd/system/display-manager.service"
+# -- SDDM is masked; getty autologin handles login (no display-manager.service)
+# NetworkManager, bluetooth etc. still enabled via customize_airootfs.sh
 
 # -- NetworkManager --
 ln -sf /usr/lib/systemd/system/NetworkManager.service \
