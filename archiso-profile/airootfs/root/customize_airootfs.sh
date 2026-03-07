@@ -6,6 +6,14 @@ set -u
 
 echo "==> [edpearOS] customize_airootfs: starting..."
 
+# ── Ensure liveuser exists in passwd ──
+echo "==> Ensuring liveuser account exists..."
+if ! id liveuser >/dev/null 2>&1; then
+    echo "liveuser:x:1000:1000:Live User:/home/liveuser:/bin/bash" >> /etc/passwd
+    echo "liveuser:x:1000:" >> /etc/group
+    echo "  created liveuser in passwd/group"
+fi
+
 # ── liveuser home ──
 echo "==> Setting up liveuser home..."
 if id liveuser >/dev/null 2>&1; then
@@ -30,12 +38,24 @@ for grp in wheel video audio storage optical network lp scanner sys rfkill input
 done
 echo "==> liveuser groups: $(id liveuser 2>/dev/null || echo 'unknown')"
 
-# ── Remove passwords via direct shadow edit (no /proc needed) ──
-echo "==> Removing passwords via /etc/shadow..."
+# ── Ensure root and liveuser are in shadow with empty passwords ──
+echo "==> Setting up /etc/shadow..."
 if [ -f /etc/shadow ]; then
+    # Add root if missing
+    if ! grep -q '^root:' /etc/shadow; then
+        echo 'root:::::::' >> /etc/shadow
+        echo "  added root to shadow"
+    fi
+    # Add liveuser if missing
+    if ! grep -q '^liveuser:' /etc/shadow; then
+        echo 'liveuser:::::::' >> /etc/shadow
+        echo "  added liveuser to shadow"
+    fi
+    # Clear passwords (set empty)
     sed -i 's|^liveuser:[^:]*:|liveuser::|' /etc/shadow
     sed -i 's|^root:[^:]*:|root::|'        /etc/shadow
-    echo "==> shadow updated"
+    echo "==> shadow entries:"
+    grep -E '^(root|liveuser):' /etc/shadow
 fi
 
 # ── Session cleanup: keep only plasma.desktop ──
