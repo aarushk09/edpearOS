@@ -59,6 +59,34 @@ if [ -f /etc/shadow ]; then
     echo "==> shadow entries:"
     grep -E '^(root|liveuser):' /etc/shadow
 fi
+# Fix shadow file permissions so PAM (pam_unix.so) can read it
+# Missing shadow group or wrong perms causes PAM_AUTHINFO_UNAVAIL on autologin
+groupadd -f shadow 2>/dev/null || true
+usermod -aG shadow liveuser 2>/dev/null || true
+chown root:shadow /etc/shadow
+chmod 640 /etc/shadow
+echo "==> /etc/shadow permissions: $(stat -c '%a %U:%G' /etc/shadow)"
+
+# ── PAM: permit autologin without password for live ISO ──
+# Prepend 'auth sufficient pam_permit.so' to system-local-login so that
+# getty --autologin never hits pam_unix shadow lookup failures.
+echo "==> Patching PAM system-local-login for passwordless autologin..."
+if [ -f /etc/pam.d/system-local-login ]; then
+    if ! grep -q 'pam_permit' /etc/pam.d/system-local-login; then
+        sed -i '1s|^|auth      sufficient  pam_permit.so\n|' /etc/pam.d/system-local-login
+        echo "  injected pam_permit.so into system-local-login"
+    fi
+else
+    cat > /etc/pam.d/system-local-login << 'PAMEOF'
+#%PAM-1.0
+auth      sufficient  pam_permit.so
+auth      include     system-auth
+account   include     system-auth
+password  include     system-auth
+session   include     system-auth
+PAMEOF
+    echo "  created /etc/pam.d/system-local-login with pam_permit.so"
+fi
 
 # ── Session cleanup: keep only plasma.desktop ──
 echo "==> Cleaning up session desktop files..."
