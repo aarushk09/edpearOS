@@ -209,9 +209,32 @@ find "$PROFILE_DIR" -type f \
   \( -name "*.sh" -o -name "*.preset" -o -name "*.conf" -o -name "*.service" \
      -o -name "*.desktop" -o -name "*.ini" -o -name "*.cfg" -o -name "*.py" \
      -o -name "*.txt" -o -name "*.json" -o -name "*.lua" -o -name "*.rules" \
-     -o -name "control" -o -name "profiledef.sh" \) \
+     -o -name "*.qml" -o -name "profiledef.sh" \) \
   -exec sed -i 's/\r//' {} +
 echo "    Done."
+
+# ── Always re-apply overlay & customize on incremental builds ──
+# mkarchiso uses marker files to skip completed steps. When the profile
+# changes between builds, the overlay/customize/image steps MUST re-run.
+# We keep the packages marker so package downloads are cached.
+if [ -d "$WORK_DIR" ] && [ "$CLEAN_BUILD" -eq 0 ]; then
+  echo "==> Clearing stale build markers (keeping package cache)..."
+  rm -f "$WORK_DIR/base._make_custom_airootfs"
+  rm -f "$WORK_DIR/base._make_customize_airootfs"
+  rm -f "$WORK_DIR/base._mkairootfs_squashfs"
+  rm -f "$WORK_DIR/base._prepare_airootfs_image"
+  rm -f "$WORK_DIR/base._check_if_initramfs_has_ucode"
+  rm -f "$WORK_DIR/base._make_bootmode_bios.syslinux"
+  rm -f "$WORK_DIR/base._make_bootmode_uefi.grub"
+  rm -f "$WORK_DIR/base._make_boot_on_iso9660"
+  rm -f "$WORK_DIR/base._make_common_bootmode_grub_cfg"
+  rm -f "$WORK_DIR/base._make_version"
+  rm -f "$WORK_DIR/base._make_pkglist"
+  rm -f "$WORK_DIR/build._build_buildmode_iso"
+  # Remove old squashfs and ISO so they are rebuilt
+  rm -f "$WORK_DIR"/*.img "$WORK_DIR"/*.sfs 2>/dev/null || true
+  rm -f "$OUT_DIR"/edpearOS-*.iso "$OUT_DIR"/edpearOS-*.sha256 2>/dev/null || true
+fi
 
 # ── Build ISO ──
 echo ""
